@@ -13,7 +13,9 @@
   $uri = parse_url($_SERVER['REQUEST_URI'])['path'];
   $reqMethod = $_SERVER['REQUEST_METHOD'];
   
-  $user = new Router\User(new Models\Users);
+  new Router\User(new Models\Users);
+  new Router\Post(new Models\Posts);
+  new Router\Auth(new Models\Auth);
 
   $router->fetchAction($uri, $reqMethod);
 

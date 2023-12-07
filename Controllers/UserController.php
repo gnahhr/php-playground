@@ -23,21 +23,22 @@ class UserController extends BaseController {
   public function createUser() {
     ['username' => $username, 'password' => $password] = $_POST;
 
-    return self::$user->createUser($username, $password);
+    return self::$user->createUser($username, password_hash($password, PASSWORD_BCRYPT));
+  }
+
+  public function updateUser() {
+    // Change Password
+    ['username' => $username, 'password' => $password] = $_POST;
+
+    return self::$user->updateUser(['password'], [$password], $username);
   }
 
   public function deleteUser() {
-    // var_dump(file_get_contents("php://input"));
-    $params = "";
     header("Access-Control-Allow-Origin: *");
     header("Content-Type: application/json; charset=UTF-8");
     header("Access-Control-Allow-Methods: DELETE");
     header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-
-    parse_str(file_get_contents('php://input'), $result);
-
-    echo $result['username'];
-    // var_dump($_DELETE['username']);
-    // return self::$user->deleteUser();
+    
+    return self::$user->deleteUser($_POST['username']);
   }
 }

@@ -2,6 +2,8 @@
 
 namespace Router;
 use Controllers\UserController;
+use Controllers\AuthController;
+use Controllers\PostController;
 
 class Router
 {
@@ -17,12 +19,14 @@ class Router
   public function __construct()
   {
     self::$controllerWrapper['User'] = new UserController();
+    self::$controllerWrapper['Auth'] = new AuthController();
+    self::$controllerWrapper['Post'] = new PostController();
   }
 
   private function createRoute($url, $method, $action, $model) {
     self::$routes[$method][$url] = [
       'action' => $action,
-      'model' => self::$controllerWrapper[$model],
+      'model' => $model,
     ];
   }
 
@@ -47,8 +51,21 @@ class Router
   }
 
   public function fetchAction($url, $reqMethod) {
-    ['action' => $action, 'model' => $model] = self::$routes[$reqMethod][$url];
+    $reqType = $reqMethod;
+
+    if (isset($_POST['reqType']) && $reqMethod === 'POST') {
+      $reqType = $_POST['reqType'];
+    }
+    
+    if (!isset(self::$routes[$reqType][$url])) {
+      header('HTTP/1.1 404 Not Found');
+      echo "Not found!";
+      return;
+    }
+
+    ['action' => $action, 'model' => $model] = self::$routes[$reqType][$url];
+
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($model->{$action}());
+    echo json_encode(self::$controllerWrapper[$model]->{$action}());
   }
 }

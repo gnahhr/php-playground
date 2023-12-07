@@ -44,14 +44,14 @@ class Database
     return $stmt->fetch(PDO::FETCH_ASSOC);
   }
 
-  public function create($fields = [], $table, $values = []) {
+  public function create($fields = [], $table, $uniqueValue, $values = []) {
     
     $fieldsJoin = join(', ', $fields);
     $valuesJoin = str_repeat("?, ", count($fields));
 
-    if ($this->fetch($table, "username", [$values[0]])) {
+    if ($this->fetch($table, $uniqueValue, [$values[0]])) {
       header("HTTP/1.1 404 Not Found");
-      return "Username already exists"; 
+      return "Data already exists"; 
     }
 
     $query = "INSERT INTO $table ($fieldsJoin) VALUES (". rtrim($valuesJoin,", ") . ")";
@@ -61,7 +61,7 @@ class Database
 
     if ($status) {
       header("HTTP/1.1 201 Created");
-      return "User created successfully!";
+      return "Data created successfully!";
     } else {
       header("HTTP/1.1 409 Created");
       return "Something went wrong!";
@@ -76,35 +76,38 @@ class Database
     }
 
     for ($x = 0; $x < count($fields); $x++) {
-      $updatedValues = $updatedValues . $fields[$x] . "=" . $values[$x] . ", ";
+      $updatedValues = $updatedValues . $fields[$x] . " = '" . $values[$x] . "', ";
     }
 
-    $query = "UPDATE $table SET VALUES $updatedValues WHERE $targetCol = $targetData";
-
+    $query = "UPDATE $table SET " . rtrim($updatedValues,", ") . " WHERE $targetCol = ?";
+    
     $stmt = self::$db->prepare($query);
-    $status = $stmt->execute($values);
+    $status = $stmt->execute([$targetData]);
 
     if ($status) {
-      return "User updated successfully!";
+      return "Data updated successfully!";
     } else {
       return "Something went wrong!";
     }
   }
 
   public function delete($table, $targetCol, $targetData) {
-    $query = "DELETE FROM $table WHERE $targetCol = $targetData";
-
+    $query = "DELETE FROM $table WHERE $targetCol = \"$targetData\"";
+    
     if (!$this->fetch($table, $targetCol, [$targetData])) {
-      return "Data doesn't exist!";
+      header("HTTP/1.1 404 Not Found");
+      return ['message' => "Data doesn't exist!"];
     }
 
     $stmt = self::$db->prepare($query);
     $status = $stmt->execute();
 
     if ($status) {
-      return "User deleted successfully!";
+      header("HTTP/1.1 200 Success");
+      return ['message' => "Data deleted successfully!"];
     } else {
-      return "Something went wrong!";
+      header("HTTP/1.1 200 Success");
+      return ['message' => "Something went wrong!"];
     }
   }
 }

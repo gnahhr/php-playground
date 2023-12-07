@@ -11,14 +11,14 @@ class Users extends Database {
   }
 
   public function createUser($username, $password) {
-    return $this->create($this->fields, $this->tableName, [$username, $password]);
+    return $this->create($this->fields, $this->tableName, "username", [$username, $password]);
   }
 
-  public function updateUser($fields, $values) {
-    $this->update($fields, $values, $this->tableName, 'username', 'username');
+  public function updateUser($fields, $values, $target) {
+    return $this->update($fields, $values, $this->tableName, 'username', $target);
   }
 
   public function deleteUser($username){
-    $this->delete($this->tableName, 'username', $username);
+    return $this->delete($this->tableName, 'username', $username);
   }
 }
