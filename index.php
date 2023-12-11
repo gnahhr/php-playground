@@ -1,6 +1,8 @@
 <?php
   const BASE_PATH = __DIR__ . "\\";
-
+  header('Access-Control-Allow-Origin: *');
+  header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+  header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
   require('./inc/config.php');
   
   spl_autoload_register(function ($class) {
